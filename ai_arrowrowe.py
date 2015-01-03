@@ -13,7 +13,7 @@ class Gomoku:
             for k in xrange(2)
         ]
         # 评分常数
-        self.value_constants = [1, 2, 12, 32]
+        self.value_constants = [0, 1, 2, 12, 32]
 
     def move_to_last(self, x, y, dx, dy):
         tx = x + dx

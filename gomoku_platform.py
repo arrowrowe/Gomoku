@@ -95,7 +95,7 @@ class Chessboard:
     def direction_test(self, x, y, dx, dy, active=None):
         tx, ty = x + dx, y + dy
         tn = 0
-        while 0 <= tx < self.n and 0 <= ty <= self.n and self.data[tx][ty] is not None:
+        while 0 <= tx < self.n and 0 <= ty < self.n and self.data[tx][ty] is not None:
             if self.data[tx][ty].index == self.data[x][y].index:
                 if active is not None:
                     self.data[tx][ty].active = active
