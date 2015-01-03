@@ -41,7 +41,9 @@ class Gomoku:
 
     def receive(self, x, y):
         self.put(x, y, 1 - self.index)
-        return self.find_max()
+        i, j = self.find_max()
+        self.put(i, j, self.index)
+        return i, j
 
     def start(self):
         self.put(self.n / 2, self.n / 2, self.index)
