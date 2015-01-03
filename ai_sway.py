@@ -1,11 +1,15 @@
 # coding = utf8
 
 def isOwn(p):
+    if p.x > 16 or p.y > 16 or p.x < 0 or p.y < 0:
+        return False
     if (p.value == 1):
         return True
     else:
         return False
 def isOpp(p):
+    if p.x > 16 or p.y > 16 or p.x < 0 or p.y < 0:
+        return False
     if (p.value == -1):
         return True
     else:
@@ -42,9 +46,6 @@ class Gomoku:
 
     def checkOppRow(self, row):
         i = 0
-        maxLength = 0
-        maxStart = 0
-        maxEnd = 0
         while (i < len(row)):
             
             while (i < len(row)) and (not isOpp(row[i])):
@@ -55,43 +56,56 @@ class Gomoku:
                 
                 while (i < len(row)) and (isOpp(row[i])):
                     i += 1
+
+                if i > start:
+                    end = i - 1
+                    length = end - start + 1
+                    if (length == 4):
+                        if start == 0 and end != len(row) - 1:
+                            if not isOwn(row[end + 1]):
+                                self.final.setSite(row[end + 1].x, row[end + 1].y)
+                                return True
+                        if end == len(row) - 1 and start != 0:
+                            if not isOwn(row[start - 1]):
+                                self.final.setSite(row[start - 1].x, row[start - 1].y)
+                                return True
+                        if start != 0 and end != len(row) - 1:
+                            if not isOwn(row[end + 1]):
+                                self.final.setSite(row[end + 1].x, row[end + 1].y)
+                                return True
+                            elif not isOwn(row[start - 1]):
+                                self.final.setSite(row[start -1].x, row[start - 1].y)
+                                return True
+
+        i = 0
+        while (i < len(row)):
             
-                if (i - start > maxLength) and (i < len(row)):
-                    maxLength = i - start
-                    maxStart = start
-                    maxEnd = i - 1
+            while (i < len(row)) and (not isOpp(row[i])):
+                i += 1
+            start = i
+            
+            if (start < len(row)):
+                
+                while (i < len(row)) and (isOpp(row[i])):
+                    i += 1
 
-        if (maxLength == 3):
-            if maxStart == 0 and not isOwn(row[maxEnd + 1]):
-                self.back.append(row[maxEnd + 1])
-            elif maxEnd == len(row) - 1 and not isOwn(row[maxStart - 1]):
-                self.back.append(row[maxStart - 1])
-            elif maxStart != 0 and maxEnd == len(row)-1 and not isOwn(row[maxEnd + 1]) and not isOwn(row[maxStart - 1]):
-                self.final.setSite(row[maxEnd + 1].x, row[maxEnd + 1].y)
-                return True
-
-        if (maxLength == 4):
-            if maxStart ==  0 and not isOwn(row[maxEnd + 1]):
-                self.final.setSite(row[maxEnd + 1].x, row[maxEnd + 1].y)
-                return True
-            elif maxEnd == len(row) - 1 and not isOwn(row[maxStart - 1]):
-                self.final.setSite(row[maxStart - 1].x, row[maxStart - 1].y)
-                return True
-            elif maxStart != 0 and maxEnd != len(row) - 1:
-                if not isOwn(row[maxEnd + 1]):
-                    self.final.setSite(row[maxEnd + 1].x, row[maxEnd + 1].y)
-                    return True
-                elif not isOwn(row[maxStart - 1]):
-                    self.final.setSite(row[maxStart -1].x, row[maxStart - 1].y)
-                    return True
-
-
+                if i > start:
+                    end = i - 1
+                    length = end - start + 1
+                    if (length == 3):
+                        if start == 0 and end != len(row) - 1:
+                            if not isOwn(row[end + 1]):
+                                self.back.append(row[end + 1])
+                        if end == len(row) - 1 and start != 0:
+                            if not isOwn(row[start - 1]):
+                                self.back.append(row[start - 1])
+                        if start != 0 and end != len(row)-1 and not isOwn(row[end + 1]) and not isOwn(row[start - 1]):
+                            self.final.setSite(row[end + 1].x, row[end + 1].y)
+                            return True
         return False
+
     def checkOwnRow(self, row):
         i = 0
-        maxLength = 0
-        maxStart = 0
-        maxEnd = 0
         while (i < len(row)):
             
             while (i < len(row)) and (not isOwn(row[i])):
@@ -103,25 +117,26 @@ class Gomoku:
                 while (i < len(row)) and (isOwn(row[i])):
                     i += 1
             
-                if (i - start > maxLength) and (i < len(row)):
-                    maxLength = i - start
-                    maxStart = start
-                    maxEnd = i - 1
+                if i > start:
+                    end = i - 1
+                    length  = end - start + 1
 
-        if maxLength >= 3:
-            if maxStart == 0 and not isOpp(row[maxEnd + 1]):
-                self.final.setSite(row[maxEnd + 1].x, row[maxEnd + 1].y)
-                return True
-            elif maxEnd == len(row) -1 and not isOpp(row[maxStart - 1]):
-                self.final.setSite(row[maxStart - 1].x, row[maxStart - 1].y)
-                return True
-            if maxStart != 0 and maxEnd != len(row) - 1:
-                if not isOpp(row[maxStart - 1]):
-                    self.final.setSite(row[maxStart - 1].x, row[maxStart - 1].y)
-                    return True
-                elif not isOpp(row[maxEnd + 1]):
-                    self.final.setSite(row[maxEnd + 1].x, row[maxEnd + 1].y)
-                    return True
+                    if length >= 3:
+                        if start == 0 and end != len(row) - 1:
+                            if not isOpp(row[end + 1]):
+                                self.final.setSite(row[end + 1].x, row[end + 1].y)
+                                return True
+                        elif end == len(row) -1 and start != 0:
+                            if not isOpp(row[start - 1]):
+                                self.final.setSite(row[start - 1].x, row[start - 1].y)
+                                return True
+                        if start != 0 and end != len(row) - 1:
+                            if not isOpp(row[start - 1]):
+                                self.final.setSite(row[start - 1].x, row[start - 1].y)
+                                return True
+                            elif not isOpp(row[end + 1]):
+                                self.final.setSite(row[end + 1].x, row[end + 1].y)
+                                return True
 
         return False
     def receive(self, x, y):
@@ -131,7 +146,6 @@ class Gomoku:
             for j in range(self.n):
                 row.append(self.board[i][j])
             if self.checkOppRow(row) == True:
-                print 1
                 self.board[self.final.x][self.final.y].setVaule(1)
                 return self.final.x, self.final.y
 
@@ -140,7 +154,6 @@ class Gomoku:
             for i in range(self.n):
                 row.append(self.board[i][j])
             if self.checkOppRow(row) == True:
-                print 2
                 self.board[self.final.x][self.final.y].setVaule(1)
                 return self.final.x, self.final.y
 
@@ -153,6 +166,7 @@ class Gomoku:
                 i += 1
                 j += 1
             if self.checkOppRow(row) ==  True:
+                print 1
                 self.board[self.final.x][self.final.y].setVaule(1)
                 return self.final.x, self.final.y
         for k in range(self.n):
@@ -165,6 +179,7 @@ class Gomoku:
                 j += 1
             
             if self.checkOppRow(row) ==  True:
+                print 2
                 self.board[self.final.x][self.final.y].setVaule(1)
                 return self.final.x, self.final.y
 
@@ -174,9 +189,10 @@ class Gomoku:
             row = []
             while i >= 0 and j >= 0 and i < self.n and j < self.n:
                 row.append(self.board[i][j])
-                i -= 1
-                j += 1
+                i += 1
+                j -= 1
             if self.checkOppRow(row) ==  True:
+                print 3
                 self.board[self.final.x][self.final.y].setVaule(1)
                 return self.final.x, self.final.y
 
@@ -186,9 +202,10 @@ class Gomoku:
             row = []
             while i >= 0 and j >= 0 and i < self.n and j < self.n:
                 row.append(self.board[i][j])
-                i -= 1
-                j += 1
+                i += 1
+                j -= 1
             if self.checkOppRow(row) ==  True:
+                print 4
                 self.board[self.final.x][self.final.y].setVaule(1)
                 return self.final.x, self.final.y
 
