@@ -1,6 +1,7 @@
 from optparse import OptionParser
 import ai_arrowrowe as ai0
 import ai_sway as ai1
+import ai_user as ai2
 import colorama
 
 def contest():
@@ -126,5 +127,12 @@ if __name__ == '__main__':
         if args[0] in ['0', '1']:
             aix = eval('ai%s' % args[0])
             contest_once(17, aix, aix)
+        else:
+            print('Wrong Input.')
+    elif len(args) == 2:
+        if args[0] in ['0', '1', '2'] and args[1] in ['0', '1', '2']:
+            aix = eval('ai%s' % args[0])
+            aiy = eval('ai%s' % args[1])
+            contest_once(17, aix, aiy)
         else:
             print('Wrong Input.')
