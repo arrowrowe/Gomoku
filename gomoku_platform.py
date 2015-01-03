@@ -77,9 +77,9 @@ class Chessboard:
             )
 
     def move(self, x, y, index):
-        self.step_count += 1
         if not (0 <= x < self.n and 0 <= y < self.n and self.data[x][y] is None):
             return 0
+        self.step_count += 1
         self.data[x][y] = Grid(self.step_count, index, self.colors[index])
         for dx, dy in [(-1, 0), (-1, 1), (0, 1), (1, 1)]:
             if self.direction_test(x, y, dx, dy) + self.direction_test(x, y, -dx, -dy) >= 4:

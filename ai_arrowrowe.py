@@ -39,6 +39,7 @@ class Gomoku:
 
     def put(self, x, y, index):
         self.board[x][y] = index
+        self.clean(x, y, index)
         fit = lambda p1, p2: p1 == True and p2 != True
         for dx, dy in [(-1, 0), (-1, 1), (0, 1), (1, 1)]:
             un, ux, uy, up = self.move_to_last(x, y, dx, dy)
@@ -68,9 +69,12 @@ class Gomoku:
                     self.has_four[index].append((ux, uy))
                 if fit(vp, up):
                     self.has_four[index].append((vx, vy))
-        if (x, y) in self.has_four[1 - index]:
-            self.has_four[1 - index].remove((x, y))
-        self.has_three[1 - index] = filter(lambda three: three[0] != (x, y) and three[1] != (x, y), self.has_three[1 - index])
+        self.clean(x, y, 1 - index)
+
+    def clean(self, x, y, index):
+        if (x, y) in self.has_four[index]:
+            self.has_four[index].remove((x, y))
+        self.has_three[index] = filter(lambda three: three[0] != (x, y) and three[1] != (x, y), self.has_three[index])
 
     def value(self, i, j):
         return self.think[self.index][i][j] * 1 + self.think[1 - self.index][i][j] * 2
@@ -92,12 +96,15 @@ class Gomoku:
         self.put(x, y, 1 - self.index)
         if len(self.has_four[self.index]) > 0:
             i, j = self.has_four[self.index][0]
+            # print('I win at (%d, %d)!' % (i, j))
         elif len(self.has_four[1 - self.index]) > 1:
             return None
         elif len(self.has_four[1 - self.index]) == 1:
             i, j = self.has_four[1 - self.index][0]
+            # print('Defend at (%d, %d)!' % (i, j))
         elif len(self.has_three[self.index]) > 0:
             i, j = self.has_three[self.index][0][0]
+            # print('Check at (%d, %d)!' % (i, j))
         else:
             i, j = self.find_max()
         self.put(i, j, self.index)
