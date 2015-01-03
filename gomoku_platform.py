@@ -70,7 +70,7 @@ class Chessboard:
                     '|'.join(
                         '   '
                         if (grid is None or grid.step > step_count) else
-                        grid.str(self.colors_bg[grid.index] if grid.step == step_count else '')
+                        grid.str(self.colors_bg[grid.index] if grid.step == step_count or grid.active else '')
                         for grid in row
                     )
                 ) for row_index, row in enumerate(self.data)
