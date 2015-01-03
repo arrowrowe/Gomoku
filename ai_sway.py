@@ -3,12 +3,9 @@ class Gomoku:
         self.n = n
         self.index = index
         self.name = name
-        self.k = -1
-
+        self.board = [ [0] * n for i in xrange(n) ]
     def receive(self, x, y):
-        self.k += 1
-        return self.k, 0
-
-    def start(self):
-        self.k = 0
+        self.board[x][y] = 1
         return 0, 0
+    def start(self):
+        return n / 2, n / 2
