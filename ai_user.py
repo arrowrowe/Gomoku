@@ -16,7 +16,7 @@ class Gomoku:
             color_white_bg=colors_bg[1]
         )
 
-    def ask(self, text='Your turn'):
+    def ask(self, text):
         result = input(text + ': ')
         if result is not None:
             i, j = result
@@ -27,7 +27,7 @@ class Gomoku:
     def receive(self, x, y):
         self.board.move(x, y, 1 - self.index)
         print(str(self.board))
-        return self.ask()
+        return self.ask('Your turn after (%d, %d)' % (x, y))
 
     def start(self):
         return self.ask('Init')

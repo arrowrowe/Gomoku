@@ -28,7 +28,7 @@ def contest_once(n, ai_black, ai_white):
     result_by_index = 0
     while True:
         if result is None:
-            print('%s throws in the towel.' % titles[result_by_index])
+            judge = None
             break
         x, y = result
         judge = board.move(x, y, result_by_index)
@@ -44,9 +44,12 @@ def contest_once(n, ai_black, ai_white):
     elif judge == 1:
         print('%s wins with (%2d,%2d)!' % (titles[result_by_index], x, y))
         return result_by_index
-    else:
+    elif judge == -1:
         print('Draw after %s moving (%2d,%2d).' % (titles[result_by_index], x, y))
         return -1
+    else:
+        print('%s throws in the towel.' % titles[result_by_index])
+        return 1 - result_by_index
 
 class Chessboard:
     def __init__(self, n, color_black, color_black_bg, color_white, color_white_bg):
