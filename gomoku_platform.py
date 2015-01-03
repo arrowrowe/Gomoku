@@ -1,9 +1,10 @@
+from optparse import OptionParser
 import ai_arrowrowe as ai0
 import ai_sway as ai1
 import colorama
 
 def contest():
-    contest_once(17, ai0, ai1)
+    contest_once(17, ai0, ai0)
     contest_once(17, ai1, ai0)
 
 def contest_once(n, ai_black, ai_white):
@@ -118,4 +119,12 @@ class Grid:
 colorama.init()
 
 if __name__ == '__main__':
-    contest()
+    args = OptionParser().parse_args()[1]
+    if len(args) == 0:
+        contest()
+    elif len(args) == 1:
+        if args[0] in ['0', '1']:
+            aix = eval('ai%s' % args[0])
+            contest_once(17, aix, aix)
+        else:
+            print('Wrong Input.')
