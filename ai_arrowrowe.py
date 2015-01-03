@@ -19,11 +19,15 @@ class Gomoku:
         # 评分常数
         self.value_constants = [0, 1, 2, 12, 32, 64, 128]
 
+    def echo(self, text):
+        pass
+        # print(text)
+
     def board_get(self, i, j):
         if 0 <= i < self.n and 0 <= j < self.n:
             return self.board[i][j]
         else:
-            return False
+            return -1
 
     def move_to_last(self, x, y, dx, dy):
         tx = x + dx
@@ -55,8 +59,10 @@ class Gomoku:
                 self.think[index][vx][vy] += self.value_constants[s + 1] - self.value_constants[s]
             if s >= 4:
                 if self.board_get(ux, uy) is None:
+                    self.echo('Find kill for u at (%d, %d)' % (ux, uy))
                     self.has_four[index].append((ux, uy))
                 if self.board_get(vx, vy) is None:
+                    self.echo('Find kill for v at (%d, %d)' % (vx, vy))
                     self.has_four[index].append((vx, vy))
             elif s == 3:
                 if self.board_get(ux, uy) is None and self.board_get(vx, vy) is None:
@@ -66,8 +72,10 @@ class Gomoku:
                         )
                     )
                 if fit(up, vp):
+                    self.echo('Find kill for u jump at (%d, %d)' % (ux, uy))
                     self.has_four[index].append((ux, uy))
                 if fit(vp, up):
+                    self.echo('Find kill for v jump at (%d, %d)' % (vx, vy))
                     self.has_four[index].append((vx, vy))
         self.clean(x, y, 1 - index)
 
@@ -96,15 +104,15 @@ class Gomoku:
         self.put(x, y, 1 - self.index)
         if len(self.has_four[self.index]) > 0:
             i, j = self.has_four[self.index][0]
-            # print('I win at (%d, %d)!' % (i, j))
+            self.echo('I win at (%d, %d)!' % (i, j))
         elif len(self.has_four[1 - self.index]) > 1:
             return None
         elif len(self.has_four[1 - self.index]) == 1:
             i, j = self.has_four[1 - self.index][0]
-            # print('Defend at (%d, %d)!' % (i, j))
+            self.echo('Defend at (%d, %d)!' % (i, j))
         elif len(self.has_three[self.index]) > 0:
             i, j = self.has_three[self.index][0][0]
-            # print('Check at (%d, %d)!' % (i, j))
+            self.echo('Check at (%d, %d)!' % (i, j))
         else:
             i, j = self.find_max()
         self.put(i, j, self.index)
