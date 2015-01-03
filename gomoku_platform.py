@@ -5,7 +5,7 @@ import ai_user as ai2
 import colorama
 
 def contest():
-    contest_once(17, ai0, ai0)
+    contest_once(17, ai0, ai1)
     contest_once(17, ai1, ai0)
 
 def contest_once(n, ai_black, ai_white):
