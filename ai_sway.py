@@ -1,354 +1,118 @@
-# coding = utf8
-
-def isOwn(p):
-    if p.x > 16 or p.y > 16 or p.x < 0 or p.y < 0:
-        return False
-    if (p.value == 1):
-        return True
+#coding = utf8
+#define 0 : no chess
+#define 1 : another chess
+#define 2 : my chess
+#lose: if i don't stop it, i will lose
+losed = "11111"
+loses = ["01110", "011010", "010110", "01111", "11110", "11011", "10111", "11101"]
+wined = "22222"
+wins = ["02220", "022020", "020220", "02222", "22220", "22022", "20222", "22202"]
+def initDig(i, n):
+    if i < n:
+        return i + 1
     else:
-        return False
-def isOpp(p):
-    if p.x > 16 or p.y > 16 or p.x < 0 or p.y < 0:
-        return False
-    if (p.value == -1):
-        return True
+        return 2 * n - i - 1 
+# normal x,y to addDigBoard j
+def norToAddDig(x, y, n):
+    if x + y < n:
+        return x
     else:
-        return False
-
-class point:
-    def __init__(self, x, y, value):
+        return n - y - 1
+def norToSubDig(x, y, n):
+    if x - y >= 0:
+        return y
+    else: 
+        return x
+def strReplace(str, x, c):
+    return str[0:x] + c + str[x+1:len(str)]
+class maxValue:
+    def __init__(self, v, x, y):
+        self.v = v
         self.x = x
         self.y = y
-        self.value = value
-    def setSite(self, x, y):
-        self.x = x
-        self.y = y
-    def setVaule(self, value):
-        self.value = value
-    def display(self):
-        print self.value 
-
 class Gomoku:
-    
-    def __init__(self, n, index, name='sway'):
+    def __init__(self, n, index, name="sway"):
         self.n = n
         self.index = index
         self.name = name
-        self.board = [ [point(0, 0, 0) for j in xrange(self.n)] for i in xrange(self.n) ]
-        for i in range(self.n):
-            for j in range(self.n):
-                self.board[i][j].setSite(i, j)
-    
-        self.back = [] 
-        self.final = point(0, 0, 1)
-
-    # True indicates has found the final point
-
-    def checkOppRow(self, row):
-        i = 0
-        while (i < len(row)):
-            
-            while (i < len(row)) and (not isOpp(row[i])):
-                i += 1
-            start = i
-            
-            if (start < len(row)):
-                
-                while (i < len(row)) and (isOpp(row[i])):
-                    i += 1
-
-                if i > start:
-                    end = i - 1
-                    length = end - start + 1
-                    if (length == 4):
-                        if start == 0 and end != len(row) - 1:
-                            if not isOwn(row[end + 1]):
-                                self.final.setSite(row[end + 1].x, row[end + 1].y)
-                                return True
-                        if end == len(row) - 1 and start != 0:
-                            if not isOwn(row[start - 1]):
-                                self.final.setSite(row[start - 1].x, row[start - 1].y)
-                                return True
-                        if start != 0 and end != len(row) - 1:
-                            if not isOwn(row[end + 1]):
-                                self.final.setSite(row[end + 1].x, row[end + 1].y)
-                                return True
-                            elif not isOwn(row[start - 1]):
-                                self.final.setSite(row[start -1].x, row[start - 1].y)
-                                return True
-
-        i = 0
-        while (i < len(row)):
-            
-            while (i < len(row)) and (not isOpp(row[i])):
-                i += 1
-            start = i
-            
-            if (start < len(row)):
-                
-                while (i < len(row)) and (isOpp(row[i])):
-                    i += 1
-
-                if i > start:
-                    end = i - 1
-                    length = end - start + 1
-                    if (length == 3):
-                        if start == 0 and end != len(row) - 1:
-                            if not isOwn(row[end + 1]):
-                                self.back.append(row[end + 1])
-                        if end == len(row) - 1 and start != 0:
-                            if not isOwn(row[start - 1]):
-                                self.back.append(row[start - 1])
-                        if start != 0 and end != len(row)-1 and not isOwn(row[end + 1]) and not isOwn(row[start - 1]):
-                            self.final.setSite(row[end + 1].x, row[end + 1].y)
-                            return True
-
-        i = 0
-        while (i < len(row)):
-            
-            while (i < len(row)) and (not isOpp(row[i])):
-                i += 1
-            start = i
-            
-            if (start < len(row)):
-                
-                while (i < len(row)) and (isOpp(row[i])):
-                    i += 1
-
-                if i > start:
-                    end = i - 1
-                    length = end - start + 1
-                    if (length == 2):
-                        if start - 2 >= 0 and isOpp(row[start - 2]) and not isOwn(row[start - 1]):
-                            self.final.setSite(row[start - 1].x, row[start - 1].y)
-                            return True
-                        if end + 2 < len(row) and isOpp(row[end + 2]) and not isOwn(row[end + 1]):
-                            self.final.setSite(row[end + 1].x, row[end + 1].y)
-                            return True                       
-        return False
-
-    def checkOwnRow(self, row):
-        i = 0
-        while (i < len(row)):
-            
-            while (i < len(row)) and (not isOwn(row[i])):
-                i += 1
-            start = i
-            
-            if (start < len(row)):
-                
-                while (i < len(row)) and (isOwn(row[i])):
-                    i += 1
-            
-                if i > start:
-                    end = i - 1
-                    length  = end - start + 1
-
-                    if length >= 3:
-                        if start == 0 and end != len(row) - 1:
-                            if not isOpp(row[end + 1]):
-                                self.final.setSite(row[end + 1].x, row[end + 1].y)
-                                return True
-                        elif end == len(row) -1 and start != 0:
-                            if not isOpp(row[start - 1]):
-                                self.final.setSite(row[start - 1].x, row[start - 1].y)
-                                return True
-                        if start != 0 and end != len(row) - 1:
-                            if not isOpp(row[start - 1]):
-                                self.final.setSite(row[start - 1].x, row[start - 1].y)
-                                return True
-                            elif not isOpp(row[end + 1]):
-                                self.final.setSite(row[end + 1].x, row[end + 1].y)
-                                return True
-
-        i = 0
-        while (i < len(row)):
-            
-            while (i < len(row)) and (not isOwn(row[i])):
-                i += 1
-            start = i
-            
-            if (start < len(row)):
-                
-                while (i < len(row)) and (isOwn(row[i])):
-                    i += 1
-            
-                if i > start:
-                    end = i - 1
-                    length  = end - start + 1
-
-                    if length == 2:
-                        if start == 0 and end != len(row) - 1:
-                            if not isOpp(row[end + 1]):
-                                self.final.setSite(row[end + 1].x, row[end + 1].y)
-                                return True
-                        elif end == len(row) -1 and start != 0:
-                            if not isOpp(row[start - 1]):
-                                self.final.setSite(row[start - 1].x, row[start - 1].y)
-                                return True
-                        if start != 0 and end != len(row) - 1:
-                            if not isOpp(row[start - 1]):
-                                self.final.setSite(row[start - 1].x, row[start - 1].y)
-                                return True
-                            elif not isOpp(row[end + 1]):
-                                self.final.setSite(row[end + 1].x, row[end + 1].y)
-                                return True
-
-        return False
+        self.horBoard = [('0' * self.n) for i in xrange(self.n)]
+        self.verBoard = [('0' * self.n) for i in xrange(self.n)]
+        #x + y = i
+        self.addDigBoard = [('0' * (initDig(i, n))) for i in xrange(n * 2 - 1)]
+        #x - y + n - 1 = i
+        self.subDigBoard = [('0' * (initDig(i, n))) for i in xrange(n * 2 - 1)]
+    #find the number of the s in many strings
+    def find(strArray, s):
+        total = 0
+        for str in strArray:
+            total += str.count(s)
+        return total
+    def findWin(self):
+        return self.find(self.horBoard, wined) + self.find(self.verBoard, wined) + self.find(self.addDigBoard, wined) + self.find(self.subDigBoard, wined) 
+    def findLose(self):
+        return self.find(self.horBoard, losed) + self.find(self.verBoard, losed) + self.find(self.addDigBoard, losed) + self.find(self.subDigBoard, losed)
+    #to fine how many loses values in one string
+    def findLoseValue(self):
+        total = 0
+        for lose in loses:
+            total += self.find(self.horBoard, lose) + self.find(self.verBoard, lose) + self.find(self.addDigBoard, lose) + self.find(self.subDigBoard, lose)
+        return total
+    #to fine how many wins values in one string
+    def findWinValue(self):
+        total = 0
+        for win in wins:
+            self.find(self.horBoard, win) + self.find(self.verBoard, win) + self.find(self.addDigBoard, win) + self.find(self.subDigBoard, win)
+    def changeBoard(self, x, y, type):
+        self.horBoard[x] = strReplace(self.horBoard[x], y, type)
+        self.verBoard[y] = strReplace(self.verBoard[y], x, type)
+        self.addDigBoard[x + y] = strReplace(self.addDigBoard[x + y], norToAddDig(x, y, self.n), type)
+        self.subDigBoard[x - y + self.n - 1] = strReplace(self.subDigBoard[x - y + self.n - 1], norToSubDig(x, y, self.n), type)
     def receive(self, x, y):
-        self.board[x][y].setVaule(-1)
-        for i in range(self.n):
-            row = []
-            for j in range(self.n):
-                row.append(self.board[i][j])
-            if self.checkOppRow(row) == True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        for j in range(self.n):
-            row = []
-            for i in range(self.n):
-                row.append(self.board[i][j])
-            if self.checkOppRow(row) == True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        for k in range(self.n):
-            i = 0
-            j = k
-            row = []
-            while i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i += 1
-                j += 1
-            if self.checkOppRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-        for k in range(self.n):
-            i = k
-            j = 0
-            row = []
-            while i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i += 1
-                j += 1
-            
-            if self.checkOppRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        for k in range(self.n):
-            i = 0
-            j = k
-            row = []
-            while i >= 0 and j >= 0 and i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i += 1
-                j -= 1
-            if self.checkOppRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        if k in range(self.n):
-            i = k
-            j = self.n - 1
-            row = []
-            while i >= 0 and j >= 0 and i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i += 1
-                j -= 1
-            if self.checkOppRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-
-
-
-        #check the own
-
-        #
-        for k in range(self.n):
-            i = 0
-            j = k
-            row = []
-            while i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i += 1
-                j += 1
-            if self.checkOwnRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-        for k in range(self.n):
-            i = k
-            j = 0
-            row = []
-            while i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i += 1
-                j += 1
-            
-            if self.checkOwnRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        for i in range(self.n):
-            row = []
-            for j in range(self.n):
-                row.append(self.board[i][j])
-            if self.checkOwnRow(row) == True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        for j in range(self.n):
-            row = []
-            for i in range(self.n):
-                row.append(self.board[i][j])
-            if self.checkOwnRow(row) == True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        for k in range(self.n):
-            i = 0
-            j = k
-            row = []
-            while i >= 0 and j >= 0 and i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i -= 1
-                j += 1
-            if self.checkOwnRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
-        if k in range(self.n):
-            i = k
-            j = self.n - 1
-            row = []
-            while i >= 0 and j >= 0 and i < self.n and j < self.n:
-                row.append(self.board[i][j])
-                i -= 1
-                j += 1
-            if self.checkOwnRow(row) ==  True:
-                self.board[self.final.x][self.final.y].setVaule(1)
-                return self.final.x, self.final.y
-
+        self.changeBoard(x, y, '1')
+        #find some where can win
         for i in range(self.n):
             for j in range(self.n):
-                if isOwn(self.board[i][j]):
-                    x = i + 1
-                    y = j + 1
-                    while x < self.n and y < self.n and self.board[x][y].value != 0:
-                        x += 1
-                        y += 1
-                    if x < self.n and y < self.n:
-                        self.board[x][y].setVaule(1)
-                        return x,y
-
+                if self.horBoard[i][j] == '0':
+                    self.changeBoard(i, j, '2')
+                    if self.findWin > 0:
+                        return i,j
+                    self.changeBoard(i, j, '0')
+        #find some where can lose
         for i in range(self.n):
             for j in range(self.n):
-                if not isOwn(self.board[i][j]) and not isOpp(self.board[i][j]):
-                    self.board[i][j].setVaule(1)
-                    return i, j
-        return 0, 0
+                if self.horBoard[i][j] == '0':
+                    self.changeBoard(i, j, '1')
+                    if self.findLose > 0:
+                        self.changeBoard(i, j, '2')
+                        return i, j
+                    self.changeBoard(i, j, '0')
+        #find the max lose value
+        max = maxValue(0, 0, 0)
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.horBoard[i][j] == '0':
+                    self.changeBoard(i, j, '1')
+                    new = maxValue(self.findLoseValue, i, j)
+                    if new.v > max.v:
+                        max = new
+                    self.changeBoard(i, j, '0')
+        if max.v > 2:
+            self.changeBoard(max.x, max.y, '2')
+            return max.x, max.y
+        #find the max win value
+        max = maxValue(0, 0, 0)
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.horBoard[i][j] == '0':
+                    self.changeBoard(i, j, '2')
+                    new = maxValue(self.findLoseValue, i, j)
+                    if new.v > max.v:
+                        max = new
+                    self.changeBoard(i, j, '0')
+        self.changeBoard(max.x, max.y, '2')
+        return max.x, max.y
     def start(self):
-        self.board[self.n / 2][self.n / 2].setVaule(1)
+        self.changeBoard(self.n / 2, self.n / 2, '2')
         return self.n / 2, self.n / 2
+
+
