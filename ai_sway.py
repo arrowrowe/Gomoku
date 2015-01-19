@@ -6,11 +6,16 @@ losed = ["11111", "011110"]
 #lose: if i don't stop it, i will lose
 loses = ["01110", "011010", "010110", "01111", "11110", "11011", "10111", "11101"]
 wined = ["22222"]
-#wins: if another don't stop it i will win
-wins = ["02220", "022020", "020220", "02222", "22220", "22022", "20222", "22202"]
+
 #when I am attacking, I will get all the values in the board and try the best
-valuePatterns = ["122000", "02200", "002221", "20022", "210000", "210002", "01210","211000", "211002", "21102", "201102", "21112", "022220"]
-value = [1, 2, 3, 2, 0.4, 0.4, 1.9, 1.7, 1.5, 1.5, 1.5, 4, 13]
+valuePatterns = [
+    "02220", "022020", "020220", "02222", "22220", "22022", "20222", "22202",   #if another don't stop it i will win
+    "002200","000221","122000", "002201", "102200", "02020", "122200","002221", "20022", "22002", "20221", "22021", "12202", "12022",
+    "210000", "000012", "210002", "200012", "01210", "211000", "000112", "211002", "200112", "21102", "20112", "201102", "211120", "021112"]
+value = [
+        8, 8, 8, 10, 10, 10, 10, 10,
+        2, 1, 1, 2, 2, 2, 3, 3, 2, 2, 3, 3, 3, 3,
+        0.4, 0.4, 0.5, 0.5, 1.9, 1.7, 1.7, 1.5, 1.5, 1.4, 1.4, 1.5, 3.1, 3.1]
 def initDig(i, n):
     if i < n:
         return i + 1
@@ -130,11 +135,14 @@ class Gomoku:
         for i in range(self.n):
             for j in range(self.n):
                 if self.horBoard[i][j] == '0':
+                    oldV = self.findValue(i, j)
                     self.changeBoard(i, j, '2')
-                    new = maxValue(6 * self.find(wins) + self.findValue(i, j), i, j)
+                    newV = self.findValue(i, j)
+                    new = maxValue(newV - oldV, i, j)
                     if new.v > max.v:
                         max = new
                     self.changeBoard(i, j, '0')
+        print(max.v)
         self.changeBoard(max.x, max.y, '2')
         return max.x, max.y
     def start(self):
