@@ -6,16 +6,16 @@ import ai_random as ai3
 import colorama
 
 def contest():
-    contest_once(17, ai0, ai1)
-    contest_once(17, ai1, ai0)
+    contest_once(17, ai0, ai1, True)
+    contest_once(17, ai1, ai0, True)
 
-def contest_once(n, ai_black, ai_white):
+def contest_once(n, ai_black, ai_white, wordy=False):
     print(colorama.Fore.YELLOW + colorama.Style.DIM + '=' * ((n + 1) * 4) + colorama.Style.RESET_ALL)
     colors = [colorama.Fore.BLUE + colorama.Style.BRIGHT, colorama.Fore.RED + colorama.Style.BRIGHT]
     colors_bg = [colorama.Back.CYAN, colorama.Back.YELLOW]
     players = [
-        ai_black.Gomoku(n=n, index=0),
-        ai_white.Gomoku(n=n, index=1)
+        ai_black.Gomoku(n=n, index=0, wordy=wordy),
+        ai_white.Gomoku(n=n, index=1, wordy=wordy)
     ]
     titles = ['Player %s%s%s' % (c, colorama.Style.BRIGHT, p.name) + colorama.Style.RESET_ALL for p, c in zip(players, colors)]
     board = Chessboard(
@@ -36,8 +36,9 @@ def contest_once(n, ai_black, ai_white):
         if judge is not None:
             break
         # print('Player [%s] moves (%2d,%2d).' % (players[result_by_index].name, x, y))
-        # print(str(board))
-        # raw_input('Press {Enter} to continue...')
+        if wordy:
+            print(str(board))
+            raw_input('Press {Enter} to continue...')
         result_by_index = 1 - result_by_index
         result = players[result_by_index].receive(x, y)
     print(str(board))

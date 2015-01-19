@@ -25,10 +25,11 @@ python gomoku_platform.py x, y    # aix 执黑与 aiy 进行一局.
 
 ```python
 class Gomoku:
-    def __init__(self, n, index, name='ai_new'):
+    def __init__(self, n, index, wordy=False, name='ai_new'):
         "生成nxn棋盘, 我方执黑(0)或白(1), 名为name."
         self.n = n
         self.index = index
+        self.wordy = wordy
         self.name = name
 
     def receive(self, x, y):

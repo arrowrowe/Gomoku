@@ -2,9 +2,10 @@ import gomoku_platform
 import colorama
 
 class Gomoku:
-    def __init__(self, n, index, name='arrowrowe'):
+    def __init__(self, n, index, wordy=False, name='arrowrowe'):
         self.n = n
         self.index = index
+        self.wordy = wordy
         self.name = name
         colors = [colorama.Fore.BLUE + colorama.Style.BRIGHT, colorama.Fore.RED + colorama.Style.BRIGHT]
         colors_bg = [colorama.Back.CYAN, colorama.Back.YELLOW]

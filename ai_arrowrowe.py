@@ -2,10 +2,10 @@ import re
 from random import choice
 
 class Gomoku:
-    def __init__(self, n, index, name='arrowrowe'):
-        self.wordy = False
+    def __init__(self, n, index, wordy=False, name='arrowrowe'):
         self.n = n
         self.index = index
+        self.wordy = wordy
         self.name = name
         self.datas = {i + 1: ['0' * self.n] * self.n for i in xrange(2)}
         raw_matchers = [

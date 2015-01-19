@@ -40,9 +40,10 @@ class maxValue:
         self.x = x
         self.y = y
 class Gomoku:
-    def __init__(self, n, index, name="sway"):
+    def __init__(self, n, index, wordy=False, name="sway"):
         self.n = n
         self.index = index
+        self.wordy = wordy
         self.name = name
         self.horBoard = [('0' * self.n) for i in xrange(self.n)]
         self.verBoard = [('0' * self.n) for i in xrange(self.n)]

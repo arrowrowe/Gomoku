@@ -1,9 +1,10 @@
 import random
 
 class Gomoku:
-    def __init__(self, n, index, name='random'):
+    def __init__(self, n, index, wordy=False, name='random'):
         self.n = n
         self.index = index
+        self.wordy = wordy
         self.name = name
 
     def random(self):
