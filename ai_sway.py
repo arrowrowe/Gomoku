@@ -9,7 +9,7 @@ wined = ["22222"]
 #wins: if another don't stop it i will win
 wins = ["02220", "022020", "020220", "02222", "22220", "22022", "20222", "22202"]
 #when I am attacking, I will get all the values in the board and try the best
-patterns = ["122000", "02200", "002221", "20022", "210000", "210002", "01210","211000", "211002", "21102", "201102", "21112", "022220"]
+valuePatterns = ["122000", "02200", "002221", "20022", "210000", "210002", "01210","211000", "211002", "21102", "201102", "21112", "022220"]
 value = [1, 2, 3, 2, 0.4, 0.4, 1.9, 1.7, 1.5, 1.5, 1.5, 4, 13]
 def initDig(i, n):
     if i < n:
@@ -51,38 +51,24 @@ class Gomoku:
             return True
         else:
             return False
-    def find(self, strArray, s):
+    #find the number of patterns in all board
+    def find(self, patterns):
         total = 0
-        for str in strArray:
-            total += str.count(s)
+        for pattern in patterns:
+            for str in self.horBoard:
+                total += str.count(pattern)
+            for str in self.verBoard:
+                total += str.count(pattern)
+            for str in self.addDigBoard:
+                total += str.count(pattern)
+            for str in self.subDigBoard:
+                total += str.count(pattern)
         return total
     #find the normal value
     def findValue(self, x, y):
         total = 0
-        for i in range(len(patterns)):
-            total += value[i] * (self.horBoard[x].count(patterns[i]) + self.verBoard[y].count(patterns[i]) + self.addDigBoard[x + y].count(patterns[i]) + self.subDigBoard[x - y + self.n - 1].count(patterns[i]))
-        return total
-    def findWin(self):
-        total = 0
-        for win in wined:
-            total += self.find(self.horBoard, win) + self.find(self.verBoard, win) + self.find(self.addDigBoard, win) + self.find(self.subDigBoard, win)
-        return total
-    def findLose(self):
-        total = 0
-        for lose in losed:
-            total += self.find(self.horBoard, lose) + self.find(self.verBoard, lose) + self.find(self.addDigBoard, lose) + self.find(self.subDigBoard, lose)
-        return total
-    #to fine how many wins values in one string
-    def findWinValue(self):
-        total = 0
-        for win in wins:
-            total += self.find(self.horBoard, win) + self.find(self.verBoard, win) + self.find(self.addDigBoard, win) + self.find(self.subDigBoard, win)
-        return total
-    #to fine how many loses values in one string
-    def findLoseValue(self):
-        total = 0
-        for lose in loses:
-            total += self.find(self.horBoard, lose) + self.find(self.verBoard, lose) + self.find(self.addDigBoard, lose) + self.find(self.subDigBoard, lose)
+        for i in range(len(valuePatterns)):
+            total += value[i] * (self.horBoard[x].count(valuePatterns[i]) + self.verBoard[y].count(valuePatterns[i]) + self.addDigBoard[x + y].count(valuePatterns[i]) + self.subDigBoard[x - y + self.n - 1].count(valuePatterns[i]))
         return total
     def changeBoard(self, x, y, type):
         self.horBoard[x] = strReplace(self.horBoard[x], y, type)
@@ -91,35 +77,51 @@ class Gomoku:
         self.subDigBoard[x - y + self.n - 1] = strReplace(self.subDigBoard[x - y + self.n - 1], norToSubDig(x, y, self.n), type)
     def receive(self, x, y):
         self.changeBoard(x, y, '1')
-        #find some where can win , ps: this one must only check 22222 cause may lost in other's 22222
+        #find some places can win right away
         for i in range(self.n):
             for j in range(self.n):
                 if self.horBoard[i][j] == '0':
                     self.changeBoard(i, j, '2')
-                    if self.findWin() > 0:
+                    if self.find(["22222"]) > 0:
                         return i,j
                     self.changeBoard(i, j, '0')
-        #print('no where can win')
-        #find some where can lose
+        #find some places can lose right away
         for i in range(self.n):
             for j in range(self.n):
                 if self.horBoard[i][j] == '0':
                     self.changeBoard(i, j, '1')
-                    if self.findLose() > 0:
+                    if self.find(["11111"]) > 0:
+                        self.changeBoard(i, j, '2')
+                        return i, j
+                    self.changeBoard(i, j, '0')
+        #find some places can win with one step
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.horBoard[i][j] == '0':
+                    self.changeBoard(i, j, '2')
+                    if self.find(["022220"]) > 0:
+                        return i, j
+                    self.changeBoard(i, j, '0')
+        #find some places can lose with one step
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.horBoard[i][j] == '0':
+                    self.changeBoard(i, j, '1')
+                    if self.find(["011110"]) > 0:
                         self.changeBoard(i, j, '2')
                         return i, j
                     self.changeBoard(i, j, '0')
         #find the max lose value
-        #print('no where can lose')
         max = maxValue(0, 0, 0)
         for i in range(self.n):
             for j in range(self.n):
                 if self.horBoard[i][j] == '0':
                     self.changeBoard(i, j, '1')
-                    new = maxValue(self.findLoseValue(), i, j)
+                    new = maxValue(self.find(loses), i, j)
                     if new.v > max.v:
                         max = new
                     self.changeBoard(i, j, '0')
+        #if the max lose value > 2, must stop it otherwise i will lose
         if max.v >= 2:
             self.changeBoard(max.x, max.y, '2')
             return max.x, max.y
@@ -129,7 +131,7 @@ class Gomoku:
             for j in range(self.n):
                 if self.horBoard[i][j] == '0':
                     self.changeBoard(i, j, '2')
-                    new = maxValue(6 * self.findWinValue() + self.findValue(i, j), i, j)
+                    new = maxValue(6 * self.find(wins) + self.findValue(i, j), i, j)
                     if new.v > max.v:
                         max = new
                     self.changeBoard(i, j, '0')
