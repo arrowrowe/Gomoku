@@ -1,123 +1,257 @@
-# coding: utf-8
+import re
+from random import choice
 
 class Gomoku:
     def __init__(self, n, index, name='arrowrowe'):
+        self.wordy = False
         self.n = n
         self.index = index
         self.name = name
-        # 实际落子
-        self.board = [[None] * self.n for i in xrange(self.n)]
-        # 对每个点的评分, 一方一套评分
-        self.think = [
-            [[0] * self.n for i in xrange(self.n)]
-            for k in xrange(2)
+        self.datas = {i + 1: ['0' * self.n] * self.n for i in xrange(2)}
+        raw_matchers = [
+            # 0, 4=>5 To win
+            ['x2222', '2x222', '22x22'],
+            # 1, 3=>4 Kill
+            ['0x2220', '02x220'],
+            # 2, 3=>4 Check
+            [
+                '0x222($|1)', '02x22($|1)', '022x2($|1)', '0222x($|1)',
+                'x0222', '20x22', '202x2', '2022x',
+                'x2022', '2x022'
+            ],
+            # 3, 2=>3 To kill
+            [
+                '00x2200', '00x220($|1)', '002x200', '002x20($|1)',
+                '0x0220', '020x20', '0202x0'
+            ],
+            # 4, 2=>3 To check
+            [
+                '00x22($|1)', '002x2($|1)', '0022x($|1)',
+                '0x022($|1)', '020x2($|1)', '0202x($|1)',
+                '0x202($|1)', '02x02($|1)', '0220x($|1)',
+                '0x220($|1)', '02x20($|1)', '022x0($|1)',
+                'x0022', '200x2', '2002x',
+                'x0202', '20x02',
+                'x0220', '20x20', '202x0'
+            ],
+            # 5, 1=>2 Drop
+            [
+                '2x', '20x', '200x', '2000x'
+            ]
         ]
-        # 记录落子即胜的点
-        self.has_four = [[], []]
-        # 记录落子就会产生 has_four 的点
-        self.has_three = [[], []]
-        # 评分常数
-        self.value_constants = [0, 1, 2, 12, 32, 64, 128]
+        self.matchers = [[re.compile(p.replace('x', '(?P<x>0)')) for p in m] for m in raw_matchers]
 
     def echo(self, text):
-        pass
-        # print(text)
-
-    def board_get(self, i, j):
-        if 0 <= i < self.n and 0 <= j < self.n:
-            return self.board[i][j]
-        else:
-            return -1
-
-    def move_to_last(self, x, y, dx, dy):
-        tx = x + dx
-        ty = y + dy
-        tn = 0
-        while 0 <= tx < self.n and 0 <= ty < self.n:
-            if self.board[tx][ty] != self.board[x][y]:
-                return tn, tx, ty, self.board[tx][ty] is None and self.board_get(tx + dx, ty + dy) == self.board[x][y]
-            tx += dx
-            ty += dy
-            tn += 1
-        return tn, None, None, None
-
-    def put(self, x, y, index):
-        self.board[x][y] = index
-        self.clean(x, y, index)
-        fit = lambda p1, p2: p1 == True and p2 != True
-        for dx, dy in [(-1, 0), (-1, 1), (0, 1), (1, 1)]:
-            un, ux, uy, up = self.move_to_last(x, y, dx, dy)
-            vn, vx, vy, vp = self.move_to_last(x, y, -dx, -dy)
-            s = un + vn + 1
-            if ux is not None:
-                self.think[index][ux][uy] += self.value_constants[s]
-            if vx is not None:
-                self.think[index][vx][vy] += self.value_constants[s]
-            if fit(up, vp):
-                self.think[index][ux][uy] += self.value_constants[s + 1] - self.value_constants[s]
-            if fit(vp, up):
-                self.think[index][vx][vy] += self.value_constants[s + 1] - self.value_constants[s]
-            if s >= 4:
-                if self.board_get(ux, uy) is None:
-                    self.echo('Find kill for u at (%d, %d)' % (ux, uy))
-                    self.has_four[index].append((ux, uy))
-                if self.board_get(vx, vy) is None:
-                    self.echo('Find kill for v at (%d, %d)' % (vx, vy))
-                    self.has_four[index].append((vx, vy))
-            elif s == 3:
-                if self.board_get(ux, uy) is None and self.board_get(vx, vy) is None:
-                    self.has_three[index].append(
-                        (
-                            (ux, uy), (vx, vy)
-                        )
-                    )
-                if fit(up, vp):
-                    self.echo('Find kill for u jump at (%d, %d)' % (ux, uy))
-                    self.has_four[index].append((ux, uy))
-                if fit(vp, up):
-                    self.echo('Find kill for v jump at (%d, %d)' % (vx, vy))
-                    self.has_four[index].append((vx, vy))
-        self.clean(x, y, 1 - index)
-
-    def clean(self, x, y, index):
-        if (x, y) in self.has_four[index]:
-            self.has_four[index].remove((x, y))
-        self.has_three[index] = filter(lambda three: three[0] != (x, y) and three[1] != (x, y), self.has_three[index])
-
-    def value(self, i, j):
-        return self.think[self.index][i][j] * 1 + self.think[1 - self.index][i][j] * 2
-
-    def find_max(self):
-        m = 0
-        mi, mj = -1, -1
-        for i in xrange(self.n):
-            for j in xrange(self.n):
-                if self.board[i][j] is not None:
-                    continue
-                v = self.value(i, j)
-                if v > m:
-                    m = v
-                    mi, mj = i, j
-        return mi, mj
+        if self.wordy:
+            print(text)
 
     def receive(self, x, y):
-        self.put(x, y, 1 - self.index)
-        if len(self.has_four[self.index]) > 0:
-            i, j = self.has_four[self.index][0]
-            self.echo('I win at (%d, %d)!' % (i, j))
-        elif len(self.has_four[1 - self.index]) > 1:
-            return None
-        elif len(self.has_four[1 - self.index]) == 1:
-            i, j = self.has_four[1 - self.index][0]
-            self.echo('Defend at (%d, %d)!' % (i, j))
-        elif len(self.has_three[self.index]) > 0:
-            i, j = self.has_three[self.index][0][0]
-            self.echo('Check at (%d, %d)!' % (i, j))
-        else:
-            i, j = self.find_max()
-        self.put(i, j, self.index)
-        return i, j
+        self.put(1, (x, y))
+        my_to_win, my_kill, my_double_check, my_check_to_kill, my_check_for_future_check, my_check_for_future_to_kill, my_to_kill_for_future_check, my_double_to_kill, my_to_kill_for_future_to_kill, my_check, my_to_kill, my_to_check, my_drop = self.get_valued_matched(2)
+        his_to_win, his_kill, his_double_check, his_check_to_kill, his_check_for_future_check, his_check_for_future_to_kill, his_to_kill_for_future_check, his_double_to_kill, his_to_kill_for_future_to_kill, his_check, his_to_kill, his_to_check, his_drop = self.get_valued_matched(1)
+        pos = None
+        for poses in [
+            'my_to_win',
+            'his_to_win',
+            'my_double_check', 'my_kill', 'my_check_to_kill',
+            'his_double_check', 'his_check_to_kill',
+            'my_check_for_future_check',
+            'his_check_for_future_check',
+            'his_kill',
+            'my_check_for_future_to_kill',
+            'his_check_for_future_to_kill',
+            'my_double_to_kill',
+            'his_double_to_kill',
+            'my_to_kill_for_future_check',
+            'his_to_kill_for_future_check',
+            'my_to_kill_for_future_to_kill',
+            'his_to_kill_for_future_to_kill',
+            'my_to_kill',
+            'his_to_kill',
+            'my_check',
+            'his_check',
+            'my_to_check',
+            'his_to_check',
+            'my_drop',
+            'his_drop'
+        ]:
+            if eval(poses):
+                self.echo('Take ' + poses)
+                # pos = choice(poses)
+                pos = eval(poses)[0]
+                break
+        if pos:
+            self.put(2, pos)
+        return pos
 
     def start(self):
-        self.put(self.n / 2, self.n / 2, self.index)
-        return self.n / 2, self.n / 2
+        i = self.n / 2
+        self.put(2, (i, i))
+        return i, i
+
+    def put(self, index, pos):
+        x, y = pos
+        self.datas[2][x] = splice(self.datas[2][x], y, 1, str(index))
+        self.datas[1][x] = splice(self.datas[1][x], y, 1, str(3 - index))
+
+    def remove(self, pos):
+        x, y = pos
+        self.datas[2][x] = splice(self.datas[2][x], y, 1, '0')
+        self.datas[1][x] = splice(self.datas[1][x], y, 1, '0')
+
+    def get_valued_matched(self, index):
+        pos_to_win, pos_kill, pos_double_check, pos_check_to_kill, pos_double_to_kill, pos_check, pos_to_kill, pos_to_check, pos_drop = self.get_seen_matched(index)
+
+        pos_check_for_future_check = []
+        pos_check_for_future_to_kill = []
+        for pos in pos_check:
+            self.echo('Testing (%d, %d)' % pos)
+            self.put(index, pos)
+            future_pos_to_win, future_pos_kill, future_pos_double_check, future_pos_check_to_kill, future_pos_double_to_kill, future_pos_check, future_pos_to_kill, future_pos_to_check, future_pos_drop = self.get_seen_matched(index)
+            if len(future_pos_double_check) + len(future_pos_check_to_kill):
+                pos_check_for_future_check.append(pos)
+            if len(future_pos_double_to_kill):
+                pos_check_for_future_to_kill.append(pos)
+            self.remove(pos)
+
+        pos_to_kill_for_future_check = []
+        pos_to_kill_for_future_to_kill = []
+        for pos in pos_to_kill:
+            self.echo('Testing (%d, %d)' % pos)
+            self.put(index, pos)
+            future_pos_to_win, future_pos_kill, future_pos_double_check, future_pos_check_to_kill, future_pos_double_to_kill, future_pos_check, future_pos_to_kill, future_pos_to_check, future_pos_drop = self.get_seen_matched(index)
+            if len(future_pos_double_check) + len(future_pos_check_to_kill):
+                pos_to_kill_for_future_check.append(pos)
+            if len(future_pos_double_to_kill):
+                pos_to_kill_for_future_to_kill.append(pos)
+            self.remove(pos)
+
+        return pos_to_win, pos_kill, pos_double_check, pos_check_to_kill, pos_check_for_future_check, pos_check_for_future_to_kill, pos_to_kill_for_future_check, pos_double_to_kill, pos_to_kill_for_future_to_kill, pos_check, pos_to_kill, pos_to_check, pos_drop
+
+    def get_seen_matched(self, index):
+        pos_to_win, pos_kill, pos_check, pos_to_kill, pos_to_check, pos_drop = self.get_all_matched(index)
+        pos_double_check = pick_double(pos_check)
+        pos_check_to_kill = pick_both(pos_check, pos_to_kill)
+        pos_double_to_kill = pick_double(pos_to_kill)
+        return pos_to_win, pos_kill, pos_double_check, pos_check_to_kill, pos_double_to_kill, pos_check, pos_to_kill, pos_to_check, pos_drop
+
+    def get_all_matched(self, index):
+        matched = [[] for i in xrange(len(self.matchers))]
+        data = self.datas[index]
+        back_fn_for_backslash = lambda (x, y): (y, x - y) if x < self.n else (x + y - self.n + 1, self.n - 1 - y)
+        back_fn_for_mirror = lambda (x, y): (x, self.n - 1 - y)
+        for transformed_data, back_fn in [
+            (
+                data,
+                lambda pos: pos
+            ),
+            (
+                transpose(data),
+                lambda (x, y): (y, x)
+            ),
+            (
+                backslash(data),
+                back_fn_for_backslash
+            ),
+            (
+                backslash(mirror(data)),
+                lambda pos: back_fn_for_mirror(back_fn_for_backslash(pos))
+            )
+        ]:
+            for matcher_index, poses in enumerate(get_matched(transformed_data, self.matchers)):
+                matched[matcher_index].extend(map(back_fn, poses))
+        if self.wordy:
+            show_matched(self.n, matched)
+        return matched
+
+
+def show_matched(n, matched):
+    print
+    data = [("." * n + '  ') * len(matched)] * n
+    for matcher_index, poses in enumerate(matched):
+        for x, y in poses:
+            data[x] = splice(data[x], (n + 2) * matcher_index + y, 1, str(int(data[x][(n + 2) * matcher_index + y]) + 1 if data[x][(n + 2) * matcher_index + y] != '.' else 1))
+    print '\n'.join(data)
+
+
+def get_lower(patterns):
+    result = []
+    for p in patterns:
+        p = p.replace('x', '0')
+        i = p.find('2')
+        while i > -1:
+            q = splice(p, i, 1, 'x')
+            if q not in result and q[::-1] not in result:
+                result.append(q)
+            i = p.find('2', i + 1)
+    return result
+
+
+def splice(string, index, length=None, needle=''):
+    return string[:index] + needle + string[index + (length or len(needle)):]
+
+
+def mirror(data):
+    return map(lambda s: s[::-1], data)
+
+
+def transpose(data):
+    return map(lambda i: ''.join(row[i] for row in data), xrange(len(data)))
+
+
+def backslash(data):
+    n = len(data)
+    return map(
+        lambda i: ''.join(
+            data[p][i - p] for p in xrange(i + 1)
+        ), xrange(n)
+    ) + map(
+        lambda i: ''.join(
+            data[p][n - 1 + i - p] for p in xrange(i, n)
+        ), xrange(1, n)
+    )
+
+
+def get_matched(data, matchers):
+    mirror_data = mirror(data)
+    matched = [[] for i in xrange(len(matchers))]
+    for matcher_index, matcher in enumerate(matchers):
+        for pattern in matcher:
+            poses = filter_double(search_all(data, pattern))
+            matched[matcher_index].extend(poses)
+            mirror_poses = [
+                (pos[0], len(data[pos[0]]) - 1 - pos[1])
+                for pos in search_all(mirror_data, pattern)
+            ]
+            matched[matcher_index].extend(list_minus(mirror_poses, poses))
+    matched[3] = filter_double(matched[3])
+    return matched
+
+
+def search_all(data, pattern):
+    poses = []
+    for row_index, row in enumerate(data):
+        i = 0
+        r = pattern.search(row)
+        while r:
+            poses.append((row_index, i + r.start('x')))
+            i += r.end()
+            row = row[r.end():]
+            r = pattern.search(row, i + 1)
+    return poses
+
+
+def pick_double(a):
+    return [p for i, p in enumerate(a) if p in a[i + 1:]]
+
+
+def filter_double(a):
+    return [p for i, p in enumerate(a) if p not in a[i + 1:]]
+
+
+def pick_both(a, b):
+    return [p for p in a if p in b]
+
+
+def list_minus(a, b):
+    return [p for p in a if p not in b]

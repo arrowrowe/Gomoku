@@ -36,8 +36,8 @@ def contest_once(n, ai_black, ai_white):
         if judge is not None:
             break
         # print('Player [%s] moves (%2d,%2d).' % (players[result_by_index].name, x, y))
-        print(str(board))
-        raw_input('Press {Enter} to continue...')
+        # print(str(board))
+        # raw_input('Press {Enter} to continue...')
         result_by_index = 1 - result_by_index
         result = players[result_by_index].receive(x, y)
     print(str(board))
